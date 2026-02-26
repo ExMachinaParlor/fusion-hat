@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # from robot_hat import I2C, fileDB
 
-from fusion_hat._config import Config
 from fusion_hat.modules import Magnetometer
 from fusion_hat.modules.magnetometer import MagnetometerType
 import time
