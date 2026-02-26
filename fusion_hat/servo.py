@@ -83,7 +83,8 @@ class Servo(PWM):
         angle = constrain(angle, self._min, self._max)
         self._angle = angle
         calibrated_angle = angle + self._offset
-        return self.set_raw_angle(calibrated_angle)
+        self.set_raw_angle(calibrated_angle)
+        return self._angle
 
     def set_raw_angle(self, angle: float) -> None:
         """ Set the angle of the servo motor
