@@ -277,8 +277,28 @@ static ssize_t enable_store(struct kobject *kobj, struct kobj_attribute *attr,
   fusion_dev->pwm_enabled[channel] = enable ? true : false;
   mutex_unlock(&fusion_dev->lock);
   // If disabling PWM, set value to 0
-  if (!enable)
+  if (enable) {
+    int ret;
+    // Set default period
+    ret = fusion_hat_write_period_value(fusion_dev->client, channel,
+                                        PWM_PERIOD_VALUE);
+    if (ret < 0) {
+      dev_err(&fusion_dev->client->dev, "Failed to initialize channel %d: %d\n",
+              channel, ret);
+      return ret;
+    }
+
+    // Set default prescaler
+    ret = fusion_hat_write_prescaler_value(fusion_dev->client, channel,
+                                           PWM_DEFAULT_PRESCALER);
+    if (ret < 0) {
+      dev_err(&fusion_dev->client->dev, "Failed to initialize channel %d: %d\n",
+              channel, ret);
+      return ret;
+    }
+  } else {
     fusion_hat_write_pwm_value(fusion_dev->client, channel, 0);
+  }
 
   return count;
 }
@@ -317,26 +337,6 @@ int fusion_hat_pwm_probe(struct fusion_hat_dev *dev) {
     dev->pwm_enabled[i] = false;
     dev->pwm_duty_cycles[i] = 0;
     dev->pwm_periods[i] = PWM_DEFAULT_PERIOD;
-  }
-
-  // Initialize all channels with default period and prescaler values
-  for (i = 0; i < FUSION_HAT_PWM_CHANNELS; i++) {
-    // Set default period
-    ret = fusion_hat_write_period_value(dev->client, i, PWM_PERIOD_VALUE);
-    if (ret < 0) {
-      dev_err(&dev->client->dev, "Failed to initialize channel %d: %d\n", i,
-              ret);
-      return ret;
-    }
-
-    // Set default prescaler
-    ret =
-        fusion_hat_write_prescaler_value(dev->client, i, PWM_DEFAULT_PRESCALER);
-    if (ret < 0) {
-      dev_err(&dev->client->dev, "Failed to initialize channel %d: %d\n", i,
-              ret);
-      return ret;
-    }
   }
 
   // Create pwm subdirectory in sysfs
