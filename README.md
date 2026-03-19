@@ -9,6 +9,7 @@ Quick Links:
   - [Installation](#installation)
   - [Create docs](#create-docs)
   - [Debug record](#debug-record)
+  - [TODO](#todo)
   - [About SunFounder](#about-sunfounder)
   - [Contact us](#contact-us)
 
@@ -56,6 +57,10 @@ sudo pip install ~/fusion-hat/ --break-system-packages --no-deps --no-build-isol
 cd ~/fusion-hat/driver && make all && sudo make install
 cd ~/fusion-hat/examples
 ```
+
+## TODO
+
+- [ ] 帮我添加一个doctor命令, 运行命令的时候, 去检查fusion hat有没有问题, 有问题的话, 具体是什么问题, 如果没有问题, 就打印info命令的信息出来. 
 
 ## About SunFounder
 

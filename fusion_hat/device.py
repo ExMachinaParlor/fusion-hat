@@ -57,7 +57,10 @@ __all__ = [
     'PRODUCT_ID',
     'PRODUCT_VER',
     'VENDOR',
+    'is_detected',
+    'is_driver_loaded',
     'is_installed',
+    'is_connected',
     'enable_speaker',
     'disable_speaker',
     'get_speaker_state',
@@ -93,11 +96,14 @@ VENDOR = "SunFounder"
 
 DEVICE_PATH = "/sys/class/fusion_hat/fusion_hat/"
 
-def is_installed() -> bool:
-    """ Check if a Fusion Hat board is installed
+def is_detected() -> bool:
+    """ Check if Fusion Hat EEPROM is detected by Raspberry Pi
+
+    This function reads the device tree to check if the Fusion Hat's EEPROM
+    information is accessible, which indicates the hat is physically installed.
 
     Returns:
-        bool: True if installed, False otherwise
+        bool: True if detected, False otherwise
     """
     for file in os.listdir('/proc/device-tree/'):
         if 'hat' in file:
@@ -111,14 +117,51 @@ def is_installed() -> bool:
                         return True
     return False
 
+def is_driver_loaded() -> bool:
+    """ Check if Fusion Hat driver is loaded
+
+    This function checks if the Fusion Hat driver module is loaded by
+    verifying the existence of /sys/class/fusion_hat/ directory.
+
+    Returns:
+        bool: True if driver is loaded, False otherwise
+    """
+    BASE_PATH = "/sys/class/fusion_hat/"
+    return os.path.exists(BASE_PATH)
+
+def is_installed() -> bool:
+    """ Check if a Fusion Hat board is installed
+
+    .. deprecated::
+        Use :func:`is_detected` instead. This function will be removed in a future version.
+
+    Returns:
+        bool: True if installed, False otherwise
+    """
+    import warnings
+    warnings.warn(
+        "is_installed is deprecated, use is_detected instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return is_detected()
+
 def is_connected():
     """ Check if Fusion HAT is connected
+
+    .. deprecated::
+        Use :func:`is_driver_loaded` instead. This function will be removed in a future version.
 
     Returns:
         bool: True if connected
     """
-    BASE_PATH = "/sys/class/fusion_hat/"
-    return os.path.exists(BASE_PATH)
+    import warnings
+    warnings.warn(
+        "is_connected is deprecated, use is_driver_loaded instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return is_driver_loaded()
 
 def raise_if_fusion_hat_not_ready() -> bool:
     """ Check if Fusion HAT is ready
@@ -126,11 +169,17 @@ def raise_if_fusion_hat_not_ready() -> bool:
     Returns:
         bool: True if ready
     """
-    if not is_installed():
-        raise IOError("Fusion HAT not installed, make sure it is inserted on the Raspberry Pi.")
-    
-    if not is_connected():
-        raise IOError("Fusion HAT not connected, check if Fusion Hat is powered on.")
+    if not is_detected():
+        raise IOError(
+            "Fusion Hat not detected. "
+            "Please ensure the hat is properly seated on the Raspberry Pi."
+        )
+
+    if not is_driver_loaded():
+        raise IOError(
+            "Fusion Hat driver not loaded. "
+            "Please ensure the Fusion Hat kernel module is installed properly."
+        )
     
 def require_fusion_hat(func: Callable[..., Any]) -> Callable[..., Any]:
     """ Decorator to require Fusion HAT

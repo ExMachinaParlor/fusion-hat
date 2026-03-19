@@ -4,7 +4,8 @@ from fusion_hat.device import UUID
 from fusion_hat.device import PRODUCT_ID
 from fusion_hat.device import PRODUCT_VER
 from fusion_hat.device import VENDOR
-from fusion_hat.device import is_installed
+from fusion_hat.device import is_detected
+from fusion_hat.device import is_driver_loaded
 from fusion_hat.device import enable_speaker
 from fusion_hat.device import disable_speaker
 from fusion_hat.device import set_led
@@ -42,7 +43,8 @@ def main():
             "Firmware Version": get_firmware_version(),
             "Driver Version": get_driver_version(),
 
-            "Is Installed": is_installed(),
+            "Is Detected": is_detected(),
+            "Driver Loaded": "Yes" if is_driver_loaded() else "No",
             "User Button State": "Pressed" if get_usr_btn() else "Released",
             "Speaker State": "Enabled" if get_speaker_state() else "Disabled",
             "User LED State": "On" if led_status else "Off",
